@@ -45,6 +45,7 @@ Lorsque l utilisateur creer leur compte les donnees sont stocker dans db.json et
    - Gestion des utilisateurs et sessions
    - Cache local des données
 
+#### Le code OTP de test est 123456
 
 ### **Gestion des Tokens**
 ```dart

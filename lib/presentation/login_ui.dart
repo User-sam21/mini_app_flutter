@@ -62,9 +62,7 @@ class _LoginPageState extends State<LoginPage> {
       await _storage.saveUser(user);
       await _storage.setCurrentUser(user);
 
-      // Note: StorageService génère son propre token, mais on peut aussi
-      // stocker le token de l'API si nécessaire
-      // Pour l'instant, on laisse StorageService gérer son token
+      
 
       setState(() {
         isLoading = false;
@@ -123,33 +121,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // Fonction pour le mot de passe oublié
-  void _forgotPassword() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Mot de passe oublié'),
-        content: const Text(
-            'Entrez votre email pour recevoir un lien de réinitialisation'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Fonctionnalité à implémenter'),
-                ),
-              );
-            },
-            child: const Text('Envoyer'),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

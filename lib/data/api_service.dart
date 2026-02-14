@@ -4,8 +4,13 @@ import 'package:http/http.dart' as http;
 import 'package:mini_app/domain/models/user.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://10.0.2.2:3000'; 
+  static const String baseUrl = 'http://10.0.2.2:3000';
 
+  ApiService() {
+    print('⚙️ ApiService initialisé avec: $baseUrl');
+  }
+
+  // ==================== INSCRIPTION ====================
   Future<AuthResponse> signup({
     required String firstName,
     required String lastName,
@@ -13,134 +18,137 @@ class ApiService {
     required String password,
   }) async {
     try {
+      print('📝 Inscription: $email');
+
+      // Vérifier si l'email existe
+      final checkResponse = await http.get(
+        Uri.parse('$baseUrl/users?email=$email'),
+      );
+
+      if (checkResponse.statusCode == 200) {
+        final List existingUsers = jsonDecode(checkResponse.body);
+        if (existingUsers.isNotEmpty) {
+          throw Exception('Email already exists');
+        }
+      }
+
+      // Créer l'utilisateur
+      final newUser = {
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'firstName': firstName,
+        'lastName': lastName,
+        'email': email,
+        'password': password,
+        'isEmailVerified': false,
+        'phone': '',
+        'country': '',
+        'currency': '',
+        'language': '',
+        'createdAt': DateTime.now().toIso8601String(),
+      };
+
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/signup'),
+        Uri.parse('$baseUrl/users'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'firstName': firstName,
-          'lastName': lastName,
-          'email': email,
-          'password': password,
-        }),
+        body: jsonEncode(newUser),
       );
 
       if (response.statusCode == 201) {
-        return AuthResponse.fromJson(jsonDecode(response.body));
+        final createdUser = jsonDecode(response.body);
+        return AuthResponse(
+          userId: createdUser['id'],
+          token:
+              'token_${createdUser['id']}_${DateTime.now().millisecondsSinceEpoch}',
+          requiresEmailVerification: true,
+        );
       } else {
-        final error = jsonDecode(response.body);
-        throw Exception(error['error'] ?? 'Signup failed');
+        throw Exception('Signup failed');
       }
     } catch (e) {
       throw Exception('Network error: $e');
     }
   }
 
-// lib/data/api_service.dart
+  // ==================== CONNEXION ====================
   Future<Map<String, dynamic>> login({
     required String email,
     required String password,
   }) async {
     try {
-      print('🌐 Appel API login: $email');
+      print('🌐 Login: $email');
 
-      final response = await http
-          .post(
-            Uri.parse('$baseUrl/auth/login'),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'email': email,
-              'password': password,
-            }),
-          )
-          .timeout(const Duration(seconds: 10));
-
-      print('📡 Statut réponse: ${response.statusCode}');
-      print('📦 Corps réponse: ${response.body}');
-
-      if (response.statusCode == 200) {
-        // Succès - parser le JSON
-        try {
-          return jsonDecode(response.body);
-        } catch (e) {
-          throw Exception('Format de réponse invalide');
-        }
-      } else {
-        // Erreur HTTP - essayer de parser le message d'erreur
-        String errorMessage = 'Erreur de connexion';
-        try {
-          final errorData = jsonDecode(response.body);
-          errorMessage = errorData['error'] ?? errorMessage;
-        } catch (e) {
-          // Si ce n'est pas du JSON, utiliser le corps brut
-          errorMessage = response.body.isNotEmpty
-              ? response.body
-              : 'Erreur ${response.statusCode}';
-        }
-
-        throw Exception(errorMessage);
-      }
-    } on http.ClientException catch (e) {
-      print('❌ ClientException: $e');
-      throw Exception('Problème de connexion au serveur');
-    } on TimeoutException catch (e) {
-      print('❌ Timeout: $e');
-      throw Exception('Délai d\'attente dépassé');
-    } catch (e) {
-      print('❌ Erreur inattendue: $e');
-      throw Exception('Erreur réseau: $e');
-    }
-  }
-
-  Future<OtpResponse> sendOtp({required String userIdOrEmail}) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/send-otp'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'userIdOrEmail': userIdOrEmail,
-        }),
+      final response = await http.get(
+        Uri.parse('$baseUrl/users?email=$email&password=$password'),
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return OtpResponse(
-          success: data['success'],
-          expiresIn: data['expiresIn'],
-        );
+        final List<dynamic> users = jsonDecode(response.body);
+
+        if (users.isEmpty) {
+          throw Exception('Invalid email or password');
+        }
+
+        final user = users.first;
+        final token =
+            'token_${user['id']}_${DateTime.now().millisecondsSinceEpoch}';
+
+        return {
+          'token': token,
+          'user': user,
+        };
       } else {
-        final error = jsonDecode(response.body);
-        throw Exception(error['error'] ?? 'Failed to send OTP');
+        throw Exception('Login failed');
       }
     } catch (e) {
       throw Exception('Network error: $e');
     }
   }
 
+  // ==================== ENVOI OTP ====================
+  Future<OtpResponse> sendOtp({required String userIdOrEmail}) async {
+    // Simulation pour le développement
+    await Future.delayed(const Duration(seconds: 1));
+    print('📧 OTP envoyé à $userIdOrEmail (code: 123456)');
+    return OtpResponse(success: true, expiresIn: 300);
+  }
+
+  // ==================== VÉRIFICATION OTP ====================
   Future<Map<String, dynamic>> verifyOtp({
     required String userIdOrEmail,
     required String code,
   }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/verify-otp'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'userIdOrEmail': userIdOrEmail,
-          'code': code,
-        }),
-      );
+    if (code == '123456') {
+      // Marquer l'utilisateur comme vérifié
+      try {
+        // Récupérer l'utilisateur
+        final response = await http.get(
+          Uri.parse('$baseUrl/users?email=$userIdOrEmail'),
+        );
 
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        final error = jsonDecode(response.body);
-        throw Exception(error['error'] ?? 'Verification failed');
+        if (response.statusCode == 200) {
+          final List users = jsonDecode(response.body);
+          if (users.isNotEmpty) {
+            final user = users.first;
+            user['isEmailVerified'] = true;
+
+            // Mettre à jour
+            await http.put(
+              Uri.parse('$baseUrl/users/${user['id']}'),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode(user),
+            );
+          }
+        }
+      } catch (e) {
+        print('Erreur mise à jour: $e');
       }
-    } catch (e) {
-      throw Exception('Network error: $e');
+
+      return {'verified': true};
     }
+    throw Exception('Invalid verification code');
   }
 
+  // ==================== MISE À JOUR PROFIL ====================
   Future<Map<String, dynamic>> updateProfile({
     required String token,
     String? phone,
@@ -151,23 +159,35 @@ class ApiService {
     try {
       final userId = token.split('_')[1];
 
-      final response = await http.put(
-        Uri.parse('$baseUrl/profile/$userId'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'phone': phone,
-          'country': country,
-          'currency': currency,
-          'language': language,
-        }),
+      // Récupérer l'utilisateur actuel
+      final getResponse = await http.get(
+        Uri.parse('$baseUrl/users/$userId'),
       );
 
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        final error = jsonDecode(response.body);
-        throw Exception(error['error'] ?? 'Update failed');
+      if (getResponse.statusCode == 200) {
+        final user = jsonDecode(getResponse.body);
+
+        // Mettre à jour les champs
+        final updatedUser = {
+          ...user,
+          if (phone != null) 'phone': phone,
+          if (country != null) 'country': country,
+          if (currency != null) 'currency': currency,
+          if (language != null) 'language': language,
+        };
+
+        final putResponse = await http.put(
+          Uri.parse('$baseUrl/users/$userId'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(updatedUser),
+        );
+
+        if (putResponse.statusCode == 200) {
+          return {'user': updatedUser};
+        }
       }
+
+      throw Exception('Update failed');
     } catch (e) {
       throw Exception('Network error: $e');
     }

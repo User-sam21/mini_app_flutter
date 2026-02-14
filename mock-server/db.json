@@ -27,17 +27,44 @@
       "createdAt": "2024-01-16T14:20:00.000Z"
     },
     {
-      "id": "1771089336555",
-      "firstName": "ilyasse",
-      "lastName": "bel",
-      "email": "ilyasse@gmail.com",
-      "password": "a1234567",
+      "id": "de3c",
+      "firstName": "samira",
+      "lastName": "belk",
+      "email": "samira@gmail.com",
+      "password": "1234567a"
+    },
+    {
+      "id": "7e63",
+      "firstName": "samira",
+      "lastName": "belk",
+      "email": "samira@gmail.com",
+      "password": "1234567a"
+    },
+    {
+      "id": "1771104263335",
+      "firstName": "nada",
+      "lastName": "nana",
+      "email": "nada@gmail.com",
+      "password": "1234567a",
       "isEmailVerified": false,
-      "createdAt": "2026-02-14T17:15:36.555Z",
-      "phone": "666666666",
+      "phone": "",
+      "country": "",
+      "currency": "",
+      "language": "",
+      "createdAt": "2026-02-14T21:24:23.335168"
+    },
+    {
+      "id": "1771104516972",
+      "firstName": "samira",
+      "lastName": "belkt",
+      "email": "sanae@gmail.com",
+      "password": "1234567a",
+      "isEmailVerified": false,
+      "phone": "777777777",
       "country": "Morocco",
       "currency": "MAD",
-      "language": "FR"
+      "language": "FR",
+      "createdAt": "2026-02-14T21:28:36.973922"
     }
   ],
   "otps": [

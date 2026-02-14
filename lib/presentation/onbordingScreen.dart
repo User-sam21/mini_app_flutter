@@ -21,7 +21,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _formKey1 = GlobalKey<FormState>();
   final _formKey2 = GlobalKey<FormState>();
   final _formKey3 = GlobalKey<FormState>();
-  final _formKey4 = GlobalKey<FormState>(); // Added form key for page 4
+  final _formKey4 = GlobalKey<FormState>(); 
 
   // Controllers for form fields
   final TextEditingController _nameController = TextEditingController();
@@ -41,7 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _lastnameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _phoneController.dispose(); // Added dispose
+    _phoneController.dispose(); 
     super.dispose();
   }
 
@@ -81,7 +81,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  // Dans la méthode _submitForm()
+  
   void _submitForm() async {
     try {
       // Afficher un indicateur de chargement
@@ -694,8 +694,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
             const SizedBox(height: 30),
 
-            // Bouton Back - Prend toute la largeur
-            // Sans Expanded, taille basée sur le contenu
+           
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey.shade300,
