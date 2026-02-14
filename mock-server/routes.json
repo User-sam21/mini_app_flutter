@@ -1,0 +1,9 @@
+
+{
+  "/api/*": "/$1",
+  "/auth/signup": "/users",
+  "/auth/login": "/login",
+  "/auth/send-otp": "/send-otp",
+  "/auth/verify-otp": "/verify-otp",
+  "/profile/:id": "/users/:id"
+}
